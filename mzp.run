@@ -1,0 +1,8 @@
+name "FullAniSet"
+version 24.1
+
+copy SEO_FullAniSet.ms to $userScripts\SEO_FullAniSet
+drop "SEO_FullAniSet.ms"
+run "SEO_FullAniSet.ms"
+
+clear temp on reset 
