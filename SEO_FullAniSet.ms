@@ -77,6 +77,35 @@ format " \n % \n" FullAniSetVersionText
 			AniSetUIDate.fn_setListViewHeight h
 			arg_dnListView.height = AniSetUIDate.listview_heigthGet
 		)
+		fn compileListItemSorter =
+		(
+			source =  "using System;\n"
+			source += "using System.Windows.Forms;\n"
+			source += "using System.Collections;\n"
+			source += "class ListViewItemComparer : IComparer\n"
+			source += "{\n"
+			source += "    private int c;\n"
+			source += "    private bool num = false;\n"
+			source += "    private int dir = 1;\n"
+			source += "    public ListViewItemComparer() { c = 0; }\n"
+			source += "    public ListViewItemComparer(int column, bool numeric, bool reverse)\n"
+			source += "    { c = column; num = numeric; dir = reverse ? -1 : 1; }\n"
+			source += "    public int Compare(object x, object y)\n"
+			source += "    {\n"
+			source += "        if (num) return Convert.ToInt32(((ListViewItem)x).SubItems[c].Text).CompareTo(\n"
+			source += "            Convert.ToInt32(((ListViewItem)y).SubItems[c].Text)) * dir;\n"
+			source += "        else return String.Compare(((ListViewItem)x).SubItems[c].Text,\n"
+			source += "            ((ListViewItem)y).SubItems[c].Text) * dir;\n"
+			source += "    }\n"
+			source += "}"
+	 
+			local csharpProvider = dotNetObject "Microsoft.CSharp.CSharpCodeProvider"
+			local compilerParams = dotNetObject "System.CodeDom.Compiler.CompilerParameters"
+			compilerParams.GenerateInMemory = true
+			compilerParams.ReferencedAssemblies.Add("System.Windows.Forms.dll")
+			compilerResults = csharpProvider.CompileAssemblyFromSource compilerParams #(source)
+			compilerResults.CompiledAssembly
+		)
 		fn fn_deletSeletList arg_dnListView =
 		(
 			for i = arg_dnListView.SelectedItems.count to 1 by -1 do
@@ -156,6 +185,7 @@ format " \n % \n" FullAniSetVersionText
 					local newAniSet = PropertyNameFilter_fn obj
 					append m_ANISETList newAniSet
 					fn_addList RolloutAniSet.dnListView newAniSet
+					compileListItemSorter()
 				)
 			)
 		)
