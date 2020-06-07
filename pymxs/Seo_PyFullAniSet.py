@@ -2,6 +2,7 @@ import MaxPlus
 import pymxs
 from PySide2 import QtWidgets, QtCore, QtGui
 RT = pymxs.runtime
+#
 class AniSet():
     def __init__(self, name, startFrame, endFrame):
         self.name = name
@@ -59,8 +60,43 @@ class FullAniSetView(QtWidgets.QDialog):
         self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
         #
+        self.GetPropertyAnisetValue()
         self.setLayout(self.main_layout)
         self.show()
+    def MakeTreeWidgetData(self):
+        self.ani_frame_tree_widget.clear() 
+        for ani_set in self.ani_list:
+            item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
+            item.setText(0,ani_set.name)
+            item.setText(1,ani_set.start_frame)
+            item.setText(2,ani_set.end_frame)
+    def GetPropertyAnisetValue(self):
+        RT.execute('PropertyNum = fileProperties.findProperty #custom "SetAniProperty"')
+        if RT.PropertyNum == 0 :
+            print "정보없음."
+        else:
+            RT.execute('m_AniSetsString = (fileProperties.getPropertyValue #custom PropertyNum as string)')
+            RT.execute('m_AniSetStringArray = filterstring m_AniSetsString ","')
+            ani_set_string_array = list(RT.m_AniSetStringArray)
+            for obj_str in ani_set_string_array:
+                item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
+                ani_split_list = obj_str.split('~')
+                item.setText(0,ani_split_list[0])
+                item.setText(1,ani_split_list[1])
+                item.setText(2,ani_split_list[2])
+                item.setText(3,obj_str)
+
+
+    def AddData(self):
+        pass
+    def LoadAniSetList(self):
+        pass
+    def SaveAniSet(self):
+        pass
+    def SetEndFrame(sefl):
+        pass
+    def SetStartFrame(sefl):
+        pass
 
 FullAniSetView()
 
