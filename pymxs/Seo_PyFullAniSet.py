@@ -11,11 +11,14 @@ class AniSet():
 class FullAniSetView(QtWidgets.QDialog):
     frame_range_min_int = -999999
     frame_range_max_int = 999999
+    m_logEnable = False
+    m_full_string_key_num = 3 #전체문자가 자정되어있는 칼럼(열)위치번호
     def __init__(self, parent=MaxPlus.GetQMaxMainWindow()):
         super(FullAniSetView, self).__init__(parent)
         RT.clearlistener()
         self.CreateUI()
-    
+    def LogPrint(self,log_string,eanblePrint = m_logEnable):
+        print log_string
     def CreateUI(self):
         self.setWindowTitle(u"프레임 툴")
         # 레이아웃 구성 
@@ -46,12 +49,15 @@ class FullAniSetView(QtWidgets.QDialog):
         # 버튼 : 저장
         self.save_button = QtWidgets.QPushButton(u"저장", default = True, autoDefault = True)
         self.input_buttonSet_layout.addWidget(self.save_button)
+        self.save_button.clicked.connect(self.SaveAniSet)
         # 버튼 : 수정
         self.edit_button = QtWidgets.QPushButton(u"수정", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.edit_button)
+        self.edit_button.clicked.connect(self.ChangeData)
         # 버튼 : 하위 저장
         self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = True, autoDefault = True)
         self.input_buttonSet_layout.addWidget(self.sub_save_button)
+        self.sub_save_button.clicked.connect(self.SaveAniSet)
         # 프레임 뷰어
         self.frame_tree_label = QtWidgets.QLabel(u"프레임 리스트")
         self.input_main_layout.addWidget(self.frame_tree_label)
@@ -59,10 +65,23 @@ class FullAniSetView(QtWidgets.QDialog):
         self.ani_frame_tree_widget = QtWidgets.QTreeWidget()
         self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
+        self.ani_frame_tree_widget.doubleClicked.connect(self.)
         #
         self.GetPropertyAnisetValue()
         self.setLayout(self.main_layout)
         self.show()
+    def GetSelectionQModeIndex(self):
+        self.LogPrint(u'GetSelectionQModeIndex')
+        a_QItemSelectionModel = self.ani_frame_tree_widget.selectionModel()
+        index_QModelIndex = a_QItemSelectionModel.currentIndex()
+        return index_QModelIndex
+    def GetSelectionData(self, target_column_int):
+        ''' target_modelIndex.data() == string
+        '''
+        self.LogPrint(u'GetSelectionData')
+        index_QModelIndex = GetSelectionQModeIndex()
+        target_modelIndex = index_QModelIndex.sibling(index_QModelIndex.row(), target_column_int)
+        return target_modelIndex.data()
     def MakeTreeWidgetData(self):
         self.ani_frame_tree_widget.clear() 
         for ani_set in self.ani_list:
@@ -84,19 +103,24 @@ class FullAniSetView(QtWidgets.QDialog):
                 item.setText(0,ani_split_list[0])
                 item.setText(1,ani_split_list[1])
                 item.setText(2,ani_split_list[2])
-                item.setText(3,obj_str)
-
+                item.setText(m_full_string_key_num,obj_str)
 
     def AddData(self):
-        pass
+        self.LogPrint(u'AddData')
+    def ChangeData(self):
+        self.LogPrint(u'ChangeData')
     def LoadAniSetList(self):
-        pass
+        self.LogPrint( u'LoadAniSetList')
     def SaveAniSet(self):
-        pass
+        self.LogPrint(u'SaveAniSEt')
+        self.AddData()
     def SetEndFrame(sefl):
-        pass
+        self.LogPrint(u'SetEndFrmae')
     def SetStartFrame(sefl):
-        pass
+        self.LogPrint(u'SetStartFrame')
+    def SetFrameRange(self):
+        self.LogPrint(u'SetFrameRange')
+
 
 FullAniSetView()
 
