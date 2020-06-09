@@ -98,8 +98,10 @@ class FullAniSetView(QtWidgets.QDialog):
             RT.execute('m_AniSetStringArray = filterstring m_AniSetsString ","')
             ani_set_string_array = list(RT.m_AniSetStringArray)
             for obj_str in ani_set_string_array:
-                item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
                 ani_split_list = obj_str.split('~')
+                if len(ani_split_list) > 3 :
+                    self.LogPrint(u'파이썬버전 설정입니다.')
+                item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
                 item.setText(0,ani_split_list[0])
                 item.setText(1,ani_split_list[1])
                 item.setText(2,ani_split_list[2])
