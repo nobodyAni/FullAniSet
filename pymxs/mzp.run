@@ -1,0 +1,8 @@
+name "Seo_PyFullAniSet"
+version 1.00
+
+copy Seo_PyFullAniSet.py to $userScripts\Seo_PyFullAniSet
+drop "Seo_PyFullAniSet.mcr"
+run "Seo_PyFullAniSet.mcr"
+
+clear temp on reset 
