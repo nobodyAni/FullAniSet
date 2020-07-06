@@ -88,7 +88,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.show()
     def ItemListMenu(self, pos):
         menu = QtWidgets.QMenu(self)
-        menu.addAction(u'파일삭제', self.ItemDelete)
+        menu.addAction(u'목록 삭제', self.ItemDeleteMenu)
         menu.exec_(QtGui.QCursor.pos())
     def ItemDelete_bak(self):
         ''' 리스트의 아이템 삭제 '''
@@ -97,13 +97,15 @@ class FullAniSetView(QtWidgets.QDialog):
         index_QModelIndex = QItemSelectionModel.currentIndex()
         print(index_QModelIndex.row())
         self.ani_frame_tree_widget.takeTopLevelItem(index_QModelIndex.row())
+    def ItemDeleteMenu(self):
+        self.ItemDelete()
+        self.SetPropertyAnisetValue()
     def ItemDelete(self):
         ''' 리스트의 아이템 삭제 '''
         self.LogPrint(u"아이템 삭제")
         root_QTreeWidgetItem = self.ani_frame_tree_widget.invisibleRootItem()
         for item in self.ani_frame_tree_widget.selectedItems():
             root_QTreeWidgetItem.removeChild(item)
-
     def GetSelectionQModeIndex(self):
         ''' -> index_QModelIndex '''
         self.LogPrint(u'GetSelectionQModeIndex')
