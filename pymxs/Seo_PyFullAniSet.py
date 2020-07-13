@@ -24,7 +24,23 @@ class FullAniSetView(QtWidgets.QDialog):
         '''
         if eanblePrint :
             print (log_string)
+    def MaxscriptCallbackFn(self):
+        ''' 화면에 표시 될 콜백'''
+        maxscript_str = '''
+        fn fn_makeFrameViewer =
+        (
+            gw.setTransform (getCPTM())
+            size_point2 = 	getViewSize() 
+            pos_point3 = [ 0, size_point2.x * 0.5, 0]
+            frame_name_text_string
+            gw.hText pos_point3 frame_name_text_string color:yellow
+            gw.enlargeUpdateRect #whole  
+            gw.updateScreen() 
+        )
+        '''
+        RT.execute(maxscript_str)
     def CreateUI(self):
+        self.LogPrint(u"CreateUI")
         self.setWindowTitle(u"프레임 툴")
         self.resize(QtCore.QSize(420,300))
         # 레이아웃 구성 
@@ -53,7 +69,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.end_frame.setRange(self.frame_range_min_int, self.frame_range_max_int)
         self.input_frameSet_layout.addWidget(self.end_frame)
         # 버튼 : 저장
-        self.save_button = QtWidgets.QPushButton(u"저장", default = True, autoDefault = True)
+        self.save_button = QtWidgets.QPushButton(u"저장", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.save_button)
         self.save_button.clicked.connect(self.SaveAniSet)
         # 버튼 : 수정 -아직 미적용
@@ -61,7 +77,7 @@ class FullAniSetView(QtWidgets.QDialog):
         #self.input_buttonSet_layout.addWidget(self.edit_button)
         self.edit_button.clicked.connect(self.ChangeData)
         # 버튼 : 하위 저장
-        self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = True, autoDefault = True)
+        self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.sub_save_button)
         self.sub_save_button.clicked.connect(self.SubSaveAniSet)
         # 프레임 뷰어
@@ -69,6 +85,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.input_main_layout.addWidget(self.frame_tree_label)
         # 트리뷰어
         self.ani_frame_tree_widget = QtWidgets.QTreeWidget()
+        self.ani_frame_tree_widget.setExpandsOnDoubleClick(False)
         self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
         self.ani_frame_tree_widget.doubleClicked.connect(self.SetFrameRange)
@@ -126,6 +143,7 @@ class FullAniSetView(QtWidgets.QDialog):
             item.setText(1,ani_set.start_frame)
             item.setText(2,ani_set.end_frame)
     def GetPropertyAnisetValue_max(self):
+        self.LogPrint(u"in_GetPropertyAnisetValue_max")
         RT.execute('PropertyNum = fileProperties.findProperty #custom "SetAniProperty"')
         if RT.PropertyNum == 0 :
             self.LogPrint(u"정보없음")
@@ -140,6 +158,7 @@ class FullAniSetView(QtWidgets.QDialog):
                 item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
                 self.AddData(item, ani_split_list[0], ani_split_list[1], ani_split_list[2])
     def GetPropertyAnisetValue(self):
+        self.LogPrint(u"in_GetPropertyAnisetValue")
         property_num_int = RT.fileProperties.findProperty(RT.name('custom'), self.m_property_name )
         if property_num_int == 0 :
             self.LogPrint(u"정보없음")
@@ -175,6 +194,7 @@ class FullAniSetView(QtWidgets.QDialog):
             for sub_count_int in range(0, QTreeWidgetItem.childCount()):
                 sub_QTreeWidgetItem = QTreeWidgetItem.child(sub_count_int)
                 save_data = save_data + ',' + sub_QTreeWidgetItem.text(3)
+                self.LogPrint(sub_QTreeWidgetItem.text(3))
             save_data = save_data + ')'
         RT.fileProperties.addProperty( RT.name('custom'), self.m_property_name, save_data)
     def AddData(self, item, frame_name, start_frame_int, end_frame_int):
@@ -198,6 +218,8 @@ class FullAniSetView(QtWidgets.QDialog):
     def SubSaveAniSet(self):
         self.LogPrint(u'하위 저장')
         QTreeWidgetItem = self.ani_frame_tree_widget.currentItem()
+        if QTreeWidgetItem is None:
+            return
         parent_QTreeWidgetItem = QTreeWidgetItem.parent()
         if not (parent_QTreeWidgetItem is None):
             QTreeWidgetItem = parent_QTreeWidgetItem
