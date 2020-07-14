@@ -85,6 +85,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.input_main_layout.addWidget(self.frame_tree_label)
         # 트리뷰어
         self.ani_frame_tree_widget = QtWidgets.QTreeWidget()
+        self.ani_frame_tree_widget.setSortingEnabled(True) #정렬기능 활성화
         self.ani_frame_tree_widget.setExpandsOnDoubleClick(False)
         self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
@@ -96,7 +97,7 @@ class FullAniSetView(QtWidgets.QDialog):
         head_view.setSectionHidden(3,True)
         head_view.resizeSection(0, 280)
         head_view.resizeSection(1, 45)
-        ##메뉴차가
+        ##메뉴설정
         self.ani_frame_tree_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy(QtCore.Qt.CustomContextMenu))
         self.ani_frame_tree_widget.customContextMenuRequested.connect(self.ItemListMenu)
         #
