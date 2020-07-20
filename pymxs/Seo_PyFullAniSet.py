@@ -50,9 +50,11 @@ class FullAniSetView(QtWidgets.QDialog):
         self.input_title_layout = QtWidgets.QHBoxLayout()
         self.input_frameSet_layout = QtWidgets.QHBoxLayout()
         self.input_buttonSet_layout = QtWidgets.QHBoxLayout()
+        self.option_buttonSet_layout = QtWidgets.QHBoxLayout()
         self.input_main_layout.addLayout(self.input_title_layout)
         self.input_main_layout.addLayout(self.input_frameSet_layout)
         self.input_main_layout.addLayout(self.input_buttonSet_layout)
+        self.main_layout.addLayout(self.option_buttonSet_layout)
         # 프레임 입력
         self.frameSet_label = QtWidgets.QLabel(u"프레임 정보")
         self.input_title_layout.addWidget(self.frameSet_label)
@@ -97,7 +99,16 @@ class FullAniSetView(QtWidgets.QDialog):
         head_view.setSectionHidden(3,True)
         head_view.resizeSection(0, 280)
         head_view.resizeSection(1, 45)
-        ##메뉴설정
+        #옵션 ##아직 보류중 
+        #self.enableRow4_button = QtWidgets.QPushButton(u"4열보기", default = False, autoDefault = False)
+        #self.option_buttonSet_layout.addWidget(self.enableRow4_button)
+        #self.enableRow4_button.clicked.connect(self.SaveAniSet)
+        ## 출력
+        ## 갱신
+        self.refresh_button = QtWidgets.QPushButton(u"갱신", default = False, autoDefault = False)
+        self.option_buttonSet_layout.addWidget(self.refresh_button)
+        self.refresh_button.clicked.connect(self.GetPropertyAnisetValue)
+        # 메뉴설정
         self.ani_frame_tree_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy(QtCore.Qt.CustomContextMenu))
         self.ani_frame_tree_widget.customContextMenuRequested.connect(self.ItemListMenu)
         #
@@ -171,6 +182,7 @@ class FullAniSetView(QtWidgets.QDialog):
             for fll_main_str in ani_set_string_array:
                 main_str = fll_main_str[1:]
                 if not main_str:
+                    self.LogPrint(u'자료없음')
                     continue
                 ani_item_list = main_str.split(',')
                 item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
@@ -178,10 +190,13 @@ class FullAniSetView(QtWidgets.QDialog):
                 for obj_str in ani_item_list:
                     if obj_str :
                         ani_split_list = obj_str.split('~')
+                        ani_name =  ani_split_list[0]
+                        start_frame = int(ani_split_list[1])
+                        end_frame = int(ani_split_list[2])
                         if isSub_int > 0:
-                            self.AddData(QtWidgets.QTreeWidgetItem(item), ani_split_list[0], ani_split_list[1], ani_split_list[2])
+                            self.AddData(QtWidgets.QTreeWidgetItem(item), ani_name, start_frame, end_frame)
                         else:
-                            self.AddData(item, ani_split_list[0], ani_split_list[1], ani_split_list[2])
+                            self.AddData(item, ani_name, start_frame, end_frame)
                     isSub_int = isSub_int + 1
     def SetPropertyAnisetValue(self):
         ''' 자료저장'''
@@ -207,6 +222,9 @@ class FullAniSetView(QtWidgets.QDialog):
         item.setText(1,str(start_frame_int))
         item.setText(2,str(end_frame_int))
         item.setText(self.m_full_string_key_num, full_string)
+    def refreshButtonClicked(self):
+        self.ani_frame_tree_widget.clear()
+        self.GetPropertyAnisetValue()
     def ChangeData(self):
         self.LogPrint(u'ChangeData')
     def LoadAniSetList(self):
@@ -236,5 +254,5 @@ class FullAniSetView(QtWidgets.QDialog):
             end_frame = end_frame + 1
         RT.animationRange = RT.interval(start_frame,end_frame)
 
-ani_set = FullAniSetView()
+FullAniSetView()
 
