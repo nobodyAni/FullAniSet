@@ -3,7 +3,6 @@ import pymxs
 from PySide2 import QtWidgets, QtCore, QtGui
 import re
 RT = pymxs.runtime
-#
 class AniSet():
     def __init__(self, name, startFrame, endFrame):
         self.name = name
@@ -12,7 +11,7 @@ class AniSet():
 class FullAniSetView(QtWidgets.QDialog):
     frame_range_min_int = -999999
     frame_range_max_int = 999999
-    m_logEnable = True
+    m_logEnable = False
     m_full_string_key_num = 3 #전체문자가 자정되어있는 칼럼(열)위치번호
     m_property_name = "Py_SetAniProperty"
     def __init__(self, parent=MaxPlus.GetQMaxMainWindow()):
@@ -77,7 +76,7 @@ class FullAniSetView(QtWidgets.QDialog):
         # 버튼 : 수정 -아직 미적용
         self.edit_button = QtWidgets.QPushButton(u"수정", default = False, autoDefault = False)
         #self.input_buttonSet_layout.addWidget(self.edit_button)
-        self.edit_button.clicked.connect(self.ChangeData)
+        self.edit_button.clicked.connect(self.ChangeInputDataByCurrentIiem)
         # 버튼 : 하위 저장
         self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.sub_save_button)
@@ -91,7 +90,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.ani_frame_tree_widget.setExpandsOnDoubleClick(False)
         self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
-        self.ani_frame_tree_widget.doubleClicked.connect(self.SetFrameRange)
+        self.ani_frame_tree_widget.doubleClicked.connect(self.ItemDoubleClicked)
         ##헤드 설정
         head_item = self.ani_frame_tree_widget.headerItem()
         head_item.setSizeHint(0, QtCore.QSize(500, 25))
@@ -100,13 +99,13 @@ class FullAniSetView(QtWidgets.QDialog):
         head_view.resizeSection(0, 280)
         head_view.resizeSection(1, 45)
         #옵션 ##아직 보류중 
-        #self.enableRow4_button = QtWidgets.QPushButton(u"4열보기", default = False, autoDefault = False)
+        self.enableRow4_button = QtWidgets.QPushButton(u"4열보기", default = False, autoDefault = False)
         #self.option_buttonSet_layout.addWidget(self.enableRow4_button)
-        #self.enableRow4_button.clicked.connect(self.SaveAniSet)
+        self.enableRow4_button.clicked.connect(self.SaveAniSet)
         ## 출력
         ## 갱신
         self.refresh_button = QtWidgets.QPushButton(u"갱신", default = False, autoDefault = False)
-        self.option_buttonSet_layout.addWidget(self.refresh_button)
+        #self.option_buttonSet_layout.addWidget(self.refresh_button)
         self.refresh_button.clicked.connect(self.GetPropertyAnisetValue)
         # 메뉴설정
         self.ani_frame_tree_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy(QtCore.Qt.CustomContextMenu))
@@ -154,21 +153,6 @@ class FullAniSetView(QtWidgets.QDialog):
             item.setText(0,ani_set.name)
             item.setText(1,ani_set.start_frame)
             item.setText(2,ani_set.end_frame)
-    def GetPropertyAnisetValue_max(self):
-        self.LogPrint(u"in_GetPropertyAnisetValue_max")
-        RT.execute('PropertyNum = fileProperties.findProperty #custom "SetAniProperty"')
-        if RT.PropertyNum == 0 :
-            self.LogPrint(u"정보없음")
-        else:
-            RT.execute('m_AniSetsString = (fileProperties.getPropertyValue #custom PropertyNum as string)')
-            RT.execute('m_AniSetStringArray = filterstring m_AniSetsString ","')
-            ani_set_string_array = list(RT.m_AniSetStringArray)
-            for obj_str in ani_set_string_array:
-                ani_split_list = obj_str.split('~')
-                if len(ani_split_list) > 3 :
-                    self.LogPrint(u'파이썬버전 설정입니다.')
-                item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
-                self.AddData(item, ani_split_list[0], ani_split_list[1], ani_split_list[2])
     def GetPropertyAnisetValue(self):
         self.LogPrint(u"in_GetPropertyAnisetValue")
         property_num_int = RT.fileProperties.findProperty(RT.name('custom'), self.m_property_name )
@@ -225,8 +209,15 @@ class FullAniSetView(QtWidgets.QDialog):
     def refreshButtonClicked(self):
         self.ani_frame_tree_widget.clear()
         self.GetPropertyAnisetValue()
-    def ChangeData(self):
-        self.LogPrint(u'ChangeData')
+    def ChangeInputDataByCurrentIiem(self):
+        '''
+            더블 클릭 클릭했을때 프레임 입력란에 정보 업데이트
+        '''
+        self.LogPrint(u'ChangeInputDataByCurrentIiem')
+        self.start_frame.setValue(int(self.GetSelectionData(1)))
+        self.end_frame.setValue(int(self.GetSelectionData(2)))
+        self.frameName_lineEdit.setText(self.GetSelectionData(0))
+
     def LoadAniSetList(self):
         self.LogPrint( u'LoadAniSetList')
     def SaveAniSet(self):
@@ -245,6 +236,9 @@ class FullAniSetView(QtWidgets.QDialog):
         sub_item = QtWidgets.QTreeWidgetItem(QTreeWidgetItem)
         self.AddData(sub_item, self.frameName_lineEdit.text(), self.start_frame.value(), self.end_frame.value() )
         self.SetPropertyAnisetValue()
+    def ItemDoubleClicked(self):
+        self.SetFrameRange()
+        self.ChangeInputDataByCurrentIiem()
     def SetFrameRange(self):
         ''' '''
         self.LogPrint(u'SetFrameRange')
