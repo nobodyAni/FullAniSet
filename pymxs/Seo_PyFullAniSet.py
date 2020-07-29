@@ -4,10 +4,17 @@ from PySide2 import QtWidgets, QtCore, QtGui
 import re
 RT = pymxs.runtime
 class AniSet():
+    m_setList =[]
     def __init__(self, name, startFrame, endFrame):
         self.name = name
         self.start_frame = startFrame
         self.end_frame = endFrame
+    def SetData(self, index, item):
+        pass
+    def GetData(self, index):
+        pass
+    def ExportFrames(self, item):
+        pass
 class FullAniSetView(QtWidgets.QDialog):
     frame_range_min_int = -999999
     frame_range_max_int = 999999
@@ -75,8 +82,8 @@ class FullAniSetView(QtWidgets.QDialog):
         self.save_button.clicked.connect(self.SaveAniSet)
         # 버튼 : 수정 -아직 미적용
         self.edit_button = QtWidgets.QPushButton(u"수정", default = False, autoDefault = False)
-        #self.input_buttonSet_layout.addWidget(self.edit_button)
-        self.edit_button.clicked.connect(self.ChangeInputDataByCurrentIiem)
+        self.input_buttonSet_layout.addWidget(self.edit_button)
+        self.edit_button.clicked.connect(self.editItme)
         # 버튼 : 하위 저장
         self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.sub_save_button)
@@ -217,7 +224,10 @@ class FullAniSetView(QtWidgets.QDialog):
         self.start_frame.setValue(int(self.GetSelectionData(1)))
         self.end_frame.setValue(int(self.GetSelectionData(2)))
         self.frameName_lineEdit.setText(self.GetSelectionData(0))
-
+    def editItme(self):
+        qt_QModelIndex = self.GetSelectionQModeIndex()
+        qt_item = self.ani_frame_tree_widget.itemFromIndex(qt_QModelIndex)
+        self.AddData(qt_item, self.frameName_lineEdit.text(), self.start_frame.value(), self.end_frame.value() )
     def LoadAniSetList(self):
         self.LogPrint( u'LoadAniSetList')
     def SaveAniSet(self):
