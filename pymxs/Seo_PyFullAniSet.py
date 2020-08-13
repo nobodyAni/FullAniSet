@@ -249,6 +249,7 @@ class FullAniSetView(QtWidgets.QDialog):
     def ItemDoubleClicked(self):
         self.SetFrameRange()
         self.ChangeInputDataByCurrentIiem()
+        RT.redrawViews()
     def SetFrameRange(self):
         ''' '''
         self.LogPrint(u'SetFrameRange')
