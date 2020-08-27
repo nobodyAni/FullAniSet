@@ -204,10 +204,26 @@ class FullAniSetView(QtWidgets.QDialog):
                 self.LogPrint(sub_QTreeWidgetItem.text(3))
             save_data = save_data + ')'
         RT.fileProperties.addProperty( RT.name('custom'), self.m_property_name, save_data)
+    def CheckFrameNameString(self, frame_name_string):
+        result = True
+        if '(' in frame_name_string:
+            result = False
+        if ')' in frame_name_string:
+            result = False
+        if ',' in frame_name_string:
+            result = False
+        return result
     def AddData(self, item, frame_name, start_frame_int, end_frame_int):
         self.LogPrint(u'AddData')
+        isFalse = False
         if start_frame_int > end_frame_int:
-            return self.LogPrint(u'시작 프레임이 작습니다.')
+            self.LogPrint(u'시작 프레임이 작습니다.')
+            isFalse = True
+        if self.CheckFrameNameString(frame_name):
+            self.LogPrint(u'프레임 이름에 잘못된 문자가 들있습니다.')
+            isFalse = True
+        if isFalse:
+            return False
         full_string = (u'{0}~{1}~{2}'.format(frame_name, start_frame_int, end_frame_int))
         item.setText(0,frame_name)
         item.setText(1,str(start_frame_int))
