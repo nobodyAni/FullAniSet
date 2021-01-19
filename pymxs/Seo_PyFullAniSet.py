@@ -88,6 +88,8 @@ class FullAniSetView(QtWidgets.QDialog):
         self.sub_save_button = QtWidgets.QPushButton(u"하위 저장", default = False, autoDefault = False)
         self.input_buttonSet_layout.addWidget(self.sub_save_button)
         self.sub_save_button.clicked.connect(self.SubSaveAniSet)
+        # 프레임 이동
+        frame_ctrl_bar = QtWidgets.QGroupBox()   #처음으로, #이전 프레임, #다음 프레임, #끝 프레임
         # 프레임 뷰어
         self.frame_tree_label = QtWidgets.QLabel(u"프레임 리스트")
         self.input_main_layout.addWidget(self.frame_tree_label)
