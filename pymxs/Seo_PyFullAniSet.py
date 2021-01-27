@@ -3,6 +3,12 @@ import pymxs
 from PySide2 import QtWidgets, QtCore, QtGui
 import re
 RT = pymxs.runtime
+class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
+    def __init__(self, parent=None):
+        QtWidgets.QTreeWidgetItem.__init__(self, parent)
+    def __lt__(self, otherItem):
+        column = self.treeWidget().sortColumn()
+        return self.text(column).toLower() < otherItem.text(column).toLower()
 class AniSet():
     m_setList =[]
     def __init__(self, name, startFrame, endFrame):
@@ -160,8 +166,11 @@ class FullAniSetView(QtWidgets.QDialog):
         for ani_set in self.ani_list:
             item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
             item.setText(0,ani_set.name)
-            item.setText(1,ani_set.start_frame)
-            item.setText(2,ani_set.end_frame)
+            #item.setText(1,ani_set.start_frame)
+            #item.setText(2,ani_set.end_frame)
+            item.setData(1, QtCore.Qt.DisplayRole, ani_set.start_frame)
+            item.setData(2, QtCore.Qt.DisplayRole, ani_set.end_frame)
+
     def GetPropertyAnisetValue(self):
         self.LogPrint(u"in_GetPropertyAnisetValue")
         property_num_int = RT.fileProperties.findProperty(RT.name('custom'), self.m_property_name )
@@ -207,13 +216,13 @@ class FullAniSetView(QtWidgets.QDialog):
             save_data = save_data + ')'
         RT.fileProperties.addProperty( RT.name('custom'), self.m_property_name, save_data)
     def CheckFrameNameString(self, frame_name_string):
-        result = True
+        result = False
         if '(' in frame_name_string:
-            result = False
+            result = True
         if ')' in frame_name_string:
-            result = False
+            result = True
         if ',' in frame_name_string:
-            result = False
+            result = True
         return result
     def AddData(self, item, frame_name, start_frame_int, end_frame_int):
         self.LogPrint(u'AddData')
@@ -228,8 +237,10 @@ class FullAniSetView(QtWidgets.QDialog):
             return False
         full_string = (u'{0}~{1}~{2}'.format(frame_name, start_frame_int, end_frame_int))
         item.setText(0,frame_name)
-        item.setText(1,str(start_frame_int))
-        item.setText(2,str(end_frame_int))
+        #item.setText(1,str(start_frame_int))
+        item.setData(1, QtCore.Qt.DisplayRole, start_frame_int)
+        #item.setText(2,str(end_frame_int))
+        item.setData(2, QtCore.Qt.DisplayRole, end_frame_int)
         item.setText(self.m_full_string_key_num, full_string)
     def refreshButtonClicked(self):
         self.ani_frame_tree_widget.clear()
