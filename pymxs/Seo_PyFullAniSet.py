@@ -3,12 +3,6 @@ import pymxs
 from PySide2 import QtWidgets, QtCore, QtGui
 import re
 RT = pymxs.runtime
-class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
-    def __init__(self, parent=None):
-        QtWidgets.QTreeWidgetItem.__init__(self, parent)
-    def __lt__(self, otherItem):
-        column = self.treeWidget().sortColumn()
-        return self.text(column).toLower() < otherItem.text(column).toLower()
 class AniSet():
     m_setList =[]
     def __init__(self, name, startFrame, endFrame):
