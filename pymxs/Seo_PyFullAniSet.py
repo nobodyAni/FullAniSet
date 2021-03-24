@@ -45,6 +45,12 @@ class FullAniSetView(QtWidgets.QDialog):
         )
         '''
         RT.execute(maxscript_str)
+    def EnableCallback(self):
+        ''' 맥스 스크립트 콜백을 등록'''
+        RT.registerTimeCallback("fn_makeFrameViewer")
+    def DiableCallback(self):
+        ''' 맥스 스크립트 콜백 해제'''
+        RT.unRegisterTimeCallback("fn_makeFrameViewer")
     def CreateUI(self):
         self.LogPrint(u"CreateUI")
         self.setWindowTitle(u"프레임 툴")
@@ -107,15 +113,22 @@ class FullAniSetView(QtWidgets.QDialog):
         head_view.setSectionHidden(3,True)
         head_view.resizeSection(0, 280)
         head_view.resizeSection(1, 45)
+        # 분활 
+        self.exportMaxFile_button = QtWidgets.QPushButton(u"파일 분활", default = False, autoDefault = False)
+        self.option_buttonSet_layout.addWidget(self.exportMaxFile_button)
+        self.exportMaxFile_button.clicked.connect(self.TestPrint)
         #옵션 ##아직 보류중 
         self.enableRow4_button = QtWidgets.QPushButton(u"4열보기", default = False, autoDefault = False)
         #self.option_buttonSet_layout.addWidget(self.enableRow4_button)
         self.enableRow4_button.clicked.connect(self.SaveAniSet)
         ## 출력
+        self.enableViewportText_QCheckBox = QtWidgets.QCheckBox(u"화면표시")
+        self.option_buttonSet_layout.addWidget(self.enableViewportText_QCheckBox)
+        self.enableViewportText_QCheckBox.stateChanged.connect(lambda:self.TestPrint(u"enableViewportText_QCheckBox"))
         ## 갱신
         self.refresh_button = QtWidgets.QPushButton(u"갱신", default = False, autoDefault = False)
         #self.option_buttonSet_layout.addWidget(self.refresh_button)
-        self.refresh_button.clicked.connect(self.GetPropertyAnisetValue)
+        self.refresh_button.clicked.connect(self.TestPrint)
         # 메뉴설정
         self.ani_frame_tree_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy(QtCore.Qt.CustomContextMenu))
         self.ani_frame_tree_widget.customContextMenuRequested.connect(self.ItemListMenu)
@@ -282,5 +295,8 @@ class FullAniSetView(QtWidgets.QDialog):
             end_frame = end_frame + 1
         RT.animationRange = RT.interval(start_frame,end_frame)
 
+    def TestPrint(self, test_string=u"Test"):
+        ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''
+        print("[TestLog] \n" + test_string + "\n\n")
 FullAniSetView()
 
