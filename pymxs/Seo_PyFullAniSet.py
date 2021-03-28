@@ -103,7 +103,7 @@ class FullAniSetView(QtWidgets.QDialog):
         self.ani_frame_tree_widget = QtWidgets.QTreeWidget()
         self.ani_frame_tree_widget.setSortingEnabled(True) #정렬기능 활성화
         self.ani_frame_tree_widget.setExpandsOnDoubleClick(False)
-        self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자"])
+        self.ani_frame_tree_widget.setHeaderLabels([u"이름", u"시작", u"끝", u"저장용문자",u'선택'])
         self.input_main_layout.addWidget(self.ani_frame_tree_widget)
         self.ani_frame_tree_widget.doubleClicked.connect(self.ItemDoubleClicked)
         ##헤드 설정
@@ -172,11 +172,14 @@ class FullAniSetView(QtWidgets.QDialog):
         self.ani_frame_tree_widget.clear() 
         for ani_set in self.ani_list:
             item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
+            item.setFlags(item.Flags() |QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable)
+            #item.setCheckState(0, QtCore.Qt.Checked )
             item.setText(0,ani_set.name)
             #item.setText(1,ani_set.start_frame)
             #item.setText(2,ani_set.end_frame)
             item.setData(1, QtCore.Qt.DisplayRole, ani_set.start_frame)
             item.setData(2, QtCore.Qt.DisplayRole, ani_set.end_frame)
+            #item.setData(0, QtCore.Qt.CheckStateRole, QtCore.Qt.Checked)
 
     def GetPropertyAnisetValue(self):
         self.LogPrint(u"in_GetPropertyAnisetValue")
@@ -249,6 +252,7 @@ class FullAniSetView(QtWidgets.QDialog):
         #item.setText(2,str(end_frame_int))
         item.setData(2, QtCore.Qt.DisplayRole, end_frame_int)
         item.setText(self.m_full_string_key_num, full_string)
+        item.setCheckState(0, QtCore.Qt.Checked )
     def refreshButtonClicked(self):
         self.ani_frame_tree_widget.clear()
         self.GetPropertyAnisetValue()
@@ -297,6 +301,15 @@ class FullAniSetView(QtWidgets.QDialog):
 
     def TestPrint(self, test_string=u"Test"):
         ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''
-        print("[TestLog] \n" + test_string + "\n\n")
+        #print("[TestLog] \n" + test_string + "\n\n")
+        #index_QModelIndex = self.GetSelectionQModeIndex()
+        for item in self.ani_frame_tree_widget.selectedItems():
+            aa = item.checkState(0)
+            if aa == QtCore.Qt.Unchecked:
+                print('uncheck')
+            if aa == QtCore.Qt.PartiallyChecked:
+                print('PartiallyChecked')
+            if aa == QtCore.Qt.Checked:
+                print('Checked')
 FullAniSetView()
 
