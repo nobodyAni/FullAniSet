@@ -267,6 +267,7 @@ class FullAniSetView(QtWidgets.QDialog):
         qt_QModelIndex = self.GetSelectionQModeIndex()
         qt_item = self.ani_frame_tree_widget.itemFromIndex(qt_QModelIndex)
         self.AddData(qt_item, self.frameName_lineEdit.text(), self.start_frame.value(), self.end_frame.value() )
+        self.SetPropertyAnisetValue()
     def LoadAniSetList(self):
         self.LogPrint( u'LoadAniSetList')
     def SaveAniSet(self):
