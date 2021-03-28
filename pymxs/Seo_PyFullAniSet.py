@@ -30,6 +30,7 @@ class FullAniSetView(QtWidgets.QDialog):
         '''
         if eanblePrint :
             print (log_string)
+#%% 콜백 그룹 -제작중
     def MaxscriptCallbackFn(self):
         ''' 화면에 표시 될 콜백'''
         maxscript_str = '''
@@ -51,6 +52,7 @@ class FullAniSetView(QtWidgets.QDialog):
     def DiableCallback(self):
         ''' 맥스 스크립트 콜백 해제'''
         RT.unRegisterTimeCallback("fn_makeFrameViewer")
+#%% UI
     def CreateUI(self):
         self.LogPrint(u"CreateUI")
         self.setWindowTitle(u"프레임 툴")
@@ -116,18 +118,18 @@ class FullAniSetView(QtWidgets.QDialog):
         # 분활 
         self.exportMaxFile_button = QtWidgets.QPushButton(u"파일 분활", default = False, autoDefault = False)
         self.option_buttonSet_layout.addWidget(self.exportMaxFile_button)
-        self.exportMaxFile_button.clicked.connect(self.TestPrint)
+        self.exportMaxFile_button.clicked.connect(self.exportMaxFile_Run)
         #옵션 ##아직 보류중 
         self.enableRow4_button = QtWidgets.QPushButton(u"4열보기", default = False, autoDefault = False)
         #self.option_buttonSet_layout.addWidget(self.enableRow4_button)
         self.enableRow4_button.clicked.connect(self.SaveAniSet)
-        ## 출력
+        ## 출력 - 미완료
         self.enableViewportText_QCheckBox = QtWidgets.QCheckBox(u"화면표시")
-        self.option_buttonSet_layout.addWidget(self.enableViewportText_QCheckBox)
+        # self.option_buttonSet_layout.addWidget(self.enableViewportText_QCheckBox)
         self.enableViewportText_QCheckBox.stateChanged.connect(lambda:self.TestPrint(u"enableViewportText_QCheckBox"))
-        ## 갱신
+        ## 갱신 - 불필요?
         self.refresh_button = QtWidgets.QPushButton(u"갱신", default = False, autoDefault = False)
-        #self.option_buttonSet_layout.addWidget(self.refresh_button)
+        # self.option_buttonSet_layout.addWidget(self.refresh_button)
         self.refresh_button.clicked.connect(self.TestPrint)
         # 메뉴설정
         self.ani_frame_tree_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy(QtCore.Qt.CustomContextMenu))
@@ -156,6 +158,7 @@ class FullAniSetView(QtWidgets.QDialog):
         root_QTreeWidgetItem = self.ani_frame_tree_widget.invisibleRootItem()
         for item in self.ani_frame_tree_widget.selectedItems():
             root_QTreeWidgetItem.removeChild(item)
+#%% 자료입력
     def GetSelectionQModeIndex(self):
         ''' -> index_QModelIndex '''
         self.LogPrint(u'GetSelectionQModeIndex')
@@ -169,18 +172,14 @@ class FullAniSetView(QtWidgets.QDialog):
         target_modelIndex = index_QModelIndex.sibling(index_QModelIndex.row(), target_column_int)
         return target_modelIndex.data()
     def MakeTreeWidgetData(self):
+        '''사용안함..'''
         self.ani_frame_tree_widget.clear() 
         for ani_set in self.ani_list:
             item = QtWidgets.QTreeWidgetItem(self.ani_frame_tree_widget)
             item.setFlags(item.Flags() |QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable)
-            #item.setCheckState(0, QtCore.Qt.Checked )
             item.setText(0,ani_set.name)
-            #item.setText(1,ani_set.start_frame)
-            #item.setText(2,ani_set.end_frame)
             item.setData(1, QtCore.Qt.DisplayRole, ani_set.start_frame)
             item.setData(2, QtCore.Qt.DisplayRole, ani_set.end_frame)
-            #item.setData(0, QtCore.Qt.CheckStateRole, QtCore.Qt.Checked)
-
     def GetPropertyAnisetValue(self):
         self.LogPrint(u"in_GetPropertyAnisetValue")
         property_num_int = RT.fileProperties.findProperty(RT.name('custom'), self.m_property_name )
@@ -252,7 +251,7 @@ class FullAniSetView(QtWidgets.QDialog):
         #item.setText(2,str(end_frame_int))
         item.setData(2, QtCore.Qt.DisplayRole, end_frame_int)
         item.setText(self.m_full_string_key_num, full_string)
-        item.setCheckState(0, QtCore.Qt.Checked )
+        item.setCheckState(0, QtCore.Qt.Unchecked )
     def refreshButtonClicked(self):
         self.ani_frame_tree_widget.clear()
         self.GetPropertyAnisetValue()
@@ -298,18 +297,183 @@ class FullAniSetView(QtWidgets.QDialog):
         if start_frame >= end_frame :
             end_frame = end_frame + 1
         RT.animationRange = RT.interval(start_frame,end_frame)
+    #버튼
+    def exportMaxFile_Run(self):
+        #pass
+        checked_file_path_list = []
+        def GetCheckList():
+            checked_file_path_list = []
+            root = self.ani_frame_tree_widget.invisibleRootItem()
+            signal_count = root.childCount()
+            print(str(signal_count))
+            isChecked = QtCore.Qt.Checked
+            for i in range(signal_count):
+                signal = root.child(i)
+                num_children = signal.childCount()
+                if signal.checkState(0) == isChecked:
+                    checked_file_path_list.append(signal.text(3))
+                for n in range(num_children):
+                    child = signal.child(n)
+                    if child.checkState(0) == isChecked:
+                        checked_file_path_list.append(child.text(3))
+            return checked_file_path_list
+        checked_file_path_list = GetCheckList()
+        range_interval = RT.interval
+        current_dir = RT.maxfilepath
+        current_name = RT.maxFileName
+        max_dir = RT.getFilenamePath(current_dir)
+        maxfile_name = RT.getFilenameFile(current_name).split(',')[0]
+        if checked_file_path_list.count == 0:
+            QtWidgets.QMessageBox.about(self, u"알림",u'선택된 것이 없습니다. (Nothing is selected)' )
+            return 
+        maxfile_name, ok = QtWidgets.QInputDialog.getText(self,u"기본 파일명 입력", u"[입력이름_프레임이름] 형식으로 생성됩니다.",
+                                                         QtWidgets.QLineEdit.EchoMode.Normal, maxfile_name)
+        if not ok:
+            return
+        file_save = MaxPlus.FileManager.Save
+        current_file = current_dir + current_name
+        file_save(current_file)
+        file_open = MaxPlus.FileManager.Open
+        for path in checked_file_path_list:
+            print(path)
+            #프레임 설정
+            name_list = path.split('~')
+            name = name_list[0]
+            start_frame = int(name_list[1])
+            end_frame = int(name_list[2])
+            if start_frame >= end_frame :
+                end_frame = end_frame + 1
+            RT.animationRange = range_interval(start_frame, end_frame)
+            #프레임삭제
+            max_script = '''
+                fn GetAnimationRange_Interval target_nodeArray:(objects as Array)=
+                (
+                    local keyIdex_int = 0
+                    local startKeyArray = #()
+                    local endKeyArray = #()
+                    local startFrame = undefined
+                    local endFrame = undefined
 
+                    for obj in target_nodeArray do (
+                        if classof(obj.controller) == prs do (
+                            keyIdex_int = numKeys obj.pos.controller
+                            if (keyIdex_int != undefined and keyIdex_int >= 1) do
+                            (
+                                append startKeyArray (obj.pos.controller.keys[1]).time
+                                append endKeyArray (obj.pos.controller.keys[keyIdex_int]).time
+                            )
+                            keyIdex_int = numKeys obj.rotation.controller
+                            if (keyIdex_int != undefined and keyIdex_int >= 1) do
+                            (
+                                append startKeyArray (obj.rotation.controller.keys[1]).time
+                                append endKeyArray (obj.rotation.controller.keys[keyIdex_int]).time
+                            )
+                            keyIdex_int = numKeys obj.scale.controller
+                            if (keyIdex_int != undefined and keyIdex_int >= 1) do
+                            (
+                                append startKeyArray (obj.scale.controller.keys[1]).time
+                                append endKeyArray (obj.scale.controller.keys[keyIdex_int]).time
+                            )
+                        )
+                        if ClassOf obj == Biped_Object do 
+                        (
+                            keyIdex_int = numKeys obj.controller
+                            if (keyIdex_int != undefined and keyIdex_int >= 1) do
+                            (
+                                append startKeyArray (biped.getKey obj.controller 1).time
+                                append endKeyArray (biped.getKey obj.controller keyIdex_int).time
+                            )
+                        )
+                    )
+                    makeUniqueArray startKeyArray
+                    makeUniqueArray endKeyArray
+                    sort startKeyArray
+                    sort endKeyArray
+
+                    if startKeyArray.count > 0 then
+                    (
+                        startFrame
+                        startKey_integer = 0
+                        i_int = 1
+                        --while (startFrame == undefined and i_int < startKeyArray.count  ) do (
+                        --    startKey_integer = (startKeyArray[i_int] as integer)/TicksPerFrame
+                        --    if startKey_integer > -9999 do 
+                        --    (
+                        --        startFrame = startKeyArray[i_int]
+                        --    )
+                        --    i_int = i_int + 1
+                        --)
+                        startFrame = startKeyArray[i_int]
+                        endFrame = endKeyArray[endKeyArray.count]
+                    )
+                    else 
+                    (
+                        startFrame = 0
+                        endFrame = 1
+                    )
+                    if (startFrame == undefined ) do 
+                    (
+                        startFrame = 0
+                    )
+                    if (endFrame == undefined) do 
+                    (
+                        endFrame == 1
+                    )
+                    if (startFrame == endFrame) do 
+                    (
+                        endFrame = endFrame+1
+                    )
+                    reInterval = Interval startFrame endFrame
+                )
+                fn OutOfFrameDelet_fn arg_objs_array =
+                (
+                    local startFrame =  copy(animationRange.start.frame)
+                    local endFrame =  Copy(animationRange.end.frame)
+                    local goObjs_array = #()
+                    local fullAniRange_interval = GetAnimationRange_Interval()
+                    print fullAniRange_interval
+                    goObjs_array = arg_objs_array
+                        for obj in goObjs_array do
+                        (
+                            keyIdex_int = 0
+                            obj_ctrl = obj.controller
+                            deselectKeys obj.controller
+                            selectKeys obj.controller
+                            deselectKeys obj.controller (interval startFrame endFrame)
+                            if ClassOf(obj) == biped_Object do
+                            (
+                                if (getClassName obj_ctrl == "Body") then
+                                (
+                                    deleteKeys obj.controller.vertical.controller.keys #selection
+                                    deleteKeys obj.controller.horizontal.controller.keys #selection
+                                    deleteKeys obj.controller.turning.controller.keys #selection
+                                )
+                                else if obj.controller.keys.count > 0 do
+                                (
+                                    deleteKeys obj.controller.keys #selection
+                                )
+                            )
+                            if endFrame < fullAniRange_interval.end do 
+                            (
+                                deleteTime obj (endFrame+1) (fullAniRange_interval.end + 1)
+                            )
+                            if fullAniRange_interval.start < (startFrame - 1) do 
+                            (
+                                deleteTime obj (fullAniRange_interval.start - 1) (startFrame-1) #noSlide
+                            )
+                        )
+                )
+                OutOfFrameDelet_fn (objects as Array)
+            '''
+            RT.execute(max_script)
+            #파일저장
+            save_file_name = u'{0}\\{1}_{2}.max'.format(max_dir, maxfile_name , name)
+            file_save(save_file_name)
+            file_open(current_file)
+        RT.ShellLaunch(current_dir, "")
     def TestPrint(self, test_string=u"Test"):
         ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''
-        #print("[TestLog] \n" + test_string + "\n\n")
+        print("[TestLog] \n" + test_string + "\n\n")
         #index_QModelIndex = self.GetSelectionQModeIndex()
-        for item in self.ani_frame_tree_widget.selectedItems():
-            aa = item.checkState(0)
-            if aa == QtCore.Qt.Unchecked:
-                print('uncheck')
-            if aa == QtCore.Qt.PartiallyChecked:
-                print('PartiallyChecked')
-            if aa == QtCore.Qt.Checked:
-                print('Checked')
 FullAniSetView()
 
