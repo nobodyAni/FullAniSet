@@ -496,7 +496,8 @@ class FullAniSetView(QtWidgets.QDialog):
             rt.execute(max_script)
             #파일저장
             #프레임 이동
-            rt.moveframe = start_frame * -1
+            rt.execute("global moveframe = 0" )
+            rt.moveframe = (start_frame * -1)
             keymove_script = '''
                 fn keyMove movetime  =
                 (
@@ -527,9 +528,10 @@ class FullAniSetView(QtWidgets.QDialog):
 				keyMove moveframe
             '''
             rt.execute(keymove_script)
+            rt.animationRange = range_interval(0, end_frame - start_frame)
             save_file_name = u'{0}\\{1}_{2}.max'.format(max_dir, maxfile_name , name)
             file_save(save_file_name)
-            file_open(current_file)
+            file_open(current_file, True)
         rt.ShellLaunch(current_dir, "")
     def TestPrint(self, test_string=u"Test"):
         ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''

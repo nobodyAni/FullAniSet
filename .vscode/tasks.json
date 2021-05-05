@@ -24,6 +24,16 @@
                 "focus": false,
                 "panel": "shared"
             }
+        },
+        {
+            "label": "mzp build",
+            "type": "shell",
+            "command": "_압축파일생성.cmd",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
