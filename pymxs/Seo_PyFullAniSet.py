@@ -2,7 +2,35 @@ import MaxPlus
 import pymxs
 from PySide2 import QtWidgets, QtCore, QtGui
 import re
-RT = pymxs.runtime
+rt = pymxs.runtime
+class SH_Node():
+    def __int__(self):
+        pass
+    def GetHierarchy(self, nodes):
+        return_val = []
+        root_nodes = []
+        for node in nodes:
+            isRoot = False
+            p_node = node.parent
+            if p_node == None:
+                isRoot = True
+            else:
+                isRoot = True
+                for s_node in nodes:
+                    if node == s_node:
+                        isRoot = False
+            if isRoot:
+                root_nodes.append(node)
+        for root_node in root_nodes:
+            self.GetChildren(root_node, return_val)
+        return return_val
+    def GetChildren(self, node, nodes = [] ):
+        nodes.append(node)
+        for c_node in node.children:
+            self.GetChildren(c_node, nodes)
+class SH_Key():
+    def GetControllerType(self, node):
+        ctrl = node.controller
 class AniSet():
     m_setList =[]
     def __init__(self, name, startFrame, endFrame):
@@ -23,7 +51,7 @@ class FullAniSetView(QtWidgets.QDialog):
     m_property_name = "Py_SetAniProperty"
     def __init__(self, parent=MaxPlus.GetQMaxMainWindow()):
         super(FullAniSetView, self).__init__(parent)
-        RT.clearlistener()
+        rt.clearlistener()
         self.CreateUI()
     def LogPrint(self,log_string,eanblePrint = m_logEnable):
         ''' 확인용으로 사용하는 print문을 한번에 on off 할수 있는 기능
@@ -45,13 +73,13 @@ class FullAniSetView(QtWidgets.QDialog):
             gw.updateScreen() 
         )
         '''
-        RT.execute(maxscript_str)
+        rt.execute(maxscript_str)
     def EnableCallback(self):
         ''' 맥스 스크립트 콜백을 등록'''
-        RT.registerTimeCallback("fn_makeFrameViewer")
+        rt.registerTimeCallback("fn_makeFrameViewer")
     def DiableCallback(self):
         ''' 맥스 스크립트 콜백 해제'''
-        RT.unRegisterTimeCallback("fn_makeFrameViewer")
+        rt.unRegisterTimeCallback("fn_makeFrameViewer")
 #%% UI
     def CreateUI(self):
         self.LogPrint(u"CreateUI")
@@ -182,13 +210,13 @@ class FullAniSetView(QtWidgets.QDialog):
             item.setData(2, QtCore.Qt.DisplayRole, ani_set.end_frame)
     def GetPropertyAnisetValue(self):
         self.LogPrint(u"in_GetPropertyAnisetValue")
-        property_num_int = RT.fileProperties.findProperty(RT.name('custom'), self.m_property_name )
+        property_num_int = rt.fileProperties.findProperty(rt.name('custom'), self.m_property_name )
         if property_num_int == 0 :
             self.LogPrint(u"정보없음")
         else:
             #RT.execute('m_AniSetsString = (fileProperties.getPropertyValue #custom '+ str(property_num_int) + ')')
             #ani_str = (RT.m_AniSetsString).encode('UTF-8')
-            ani_str = RT.fileProperties.getPropertyValue(RT.name('custom'), property_num_int )
+            ani_str = rt.fileProperties.getPropertyValue(rt.name('custom'), property_num_int )
             ani_set_string_array = ani_str.split(')')
             for fll_main_str in ani_set_string_array:
                 main_str = fll_main_str[1:]
@@ -223,7 +251,7 @@ class FullAniSetView(QtWidgets.QDialog):
                 save_data = save_data + ',' + sub_QTreeWidgetItem.text(3)
                 self.LogPrint(sub_QTreeWidgetItem.text(3))
             save_data = save_data + ')'
-        RT.fileProperties.addProperty( RT.name('custom'), self.m_property_name, save_data)
+        rt.fileProperties.addProperty( rt.name('custom'), self.m_property_name, save_data)
     def CheckFrameNameString(self, frame_name_string):
         result = False
         if '(' in frame_name_string:
@@ -289,7 +317,7 @@ class FullAniSetView(QtWidgets.QDialog):
     def ItemDoubleClicked(self):
         self.SetFrameRange()
         self.ChangeInputDataByCurrentIiem()
-        RT.redrawViews()
+        rt.redrawViews()
     def SetFrameRange(self):
         ''' '''
         self.LogPrint(u'SetFrameRange')
@@ -297,10 +325,9 @@ class FullAniSetView(QtWidgets.QDialog):
         end_frame = int(self.GetSelectionData(2))
         if start_frame >= end_frame :
             end_frame = end_frame + 1
-        RT.animationRange = RT.interval(start_frame,end_frame)
-    #버튼
+        rt.animationRange = rt.interval(start_frame,end_frame)
+#%% 버튼
     def exportMaxFile_Run(self):
-        #pass
         checked_file_path_list = []
         def GetCheckList():
             checked_file_path_list = []
@@ -319,11 +346,11 @@ class FullAniSetView(QtWidgets.QDialog):
                         checked_file_path_list.append(child.text(3))
             return checked_file_path_list
         checked_file_path_list = GetCheckList()
-        range_interval = RT.interval
-        current_dir = RT.maxfilepath
-        current_name = RT.maxFileName
-        max_dir = RT.getFilenamePath(current_dir)
-        maxfile_name = RT.getFilenameFile(current_name).split(',')[0]
+        range_interval = rt.interval
+        current_dir = rt.maxfilepath
+        current_name = rt.maxFileName
+        max_dir = rt.getFilenamePath(current_dir)
+        maxfile_name = rt.getFilenameFile(current_name).split(',')[0]
         if checked_file_path_list.count == 0:
             QtWidgets.QMessageBox.about(self, u"알림",u'선택된 것이 없습니다. (Nothing is selected)' )
             return 
@@ -344,7 +371,7 @@ class FullAniSetView(QtWidgets.QDialog):
             end_frame = int(name_list[2])
             if start_frame >= end_frame :
                 end_frame = end_frame + 1
-            RT.animationRange = range_interval(start_frame, end_frame)
+            rt.animationRange = range_interval(start_frame, end_frame)
             #프레임삭제
             max_script = '''
                 fn GetAnimationRange_Interval target_nodeArray:(objects as Array)=
@@ -466,12 +493,44 @@ class FullAniSetView(QtWidgets.QDialog):
                 )
                 OutOfFrameDelet_fn (objects as Array)
             '''
-            RT.execute(max_script)
+            rt.execute(max_script)
             #파일저장
+            #프레임 이동
+            rt.moveframe = start_frame * -1
+            keymove_script = '''
+                fn keyMove movetime  =
+                (
+                    for obj in (for node in Objects as array collect node) do (
+                        obj_type = classof obj
+						if classof obj.controller == BipSlave_Control or  classof obj.controller == Vertical_Horizontal_Turn do 
+						(
+							bipnum = biped.maxNumNodes obj
+							isPassNode = true
+							isPassNums = #(3,4,7,8,14,15, 16, 11)
+							for i = 1 to  bipnum do (
+								if obj == (biped.getNode obj i) and findItem isPassNums i == 0 do isPassNode = false
+							)
+							if isPassNode do(
+								continue
+							)
+						)
+						moveKeys obj.controller movetime
+						case obj_type of
+						(
+							sliderManipulator:
+							(
+								moveKeys obj.value.controller movetime
+							)
+						)
+                    )
+                )
+				keyMove moveframe
+            '''
+            rt.execute(keymove_script)
             save_file_name = u'{0}\\{1}_{2}.max'.format(max_dir, maxfile_name , name)
             file_save(save_file_name)
             file_open(current_file)
-        RT.ShellLaunch(current_dir, "")
+        rt.ShellLaunch(current_dir, "")
     def TestPrint(self, test_string=u"Test"):
         ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''
         print("[TestLog] \n" + test_string + "\n\n")
