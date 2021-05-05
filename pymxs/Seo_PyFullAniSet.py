@@ -333,7 +333,6 @@ class FullAniSetView(QtWidgets.QDialog):
             checked_file_path_list = []
             root = self.ani_frame_tree_widget.invisibleRootItem()
             signal_count = root.childCount()
-            print(str(signal_count))
             isChecked = QtCore.Qt.Checked
             for i in range(signal_count):
                 signal = root.child(i)
@@ -361,7 +360,7 @@ class FullAniSetView(QtWidgets.QDialog):
         file_save = MaxPlus.FileManager.Save
         current_file = current_dir + current_name
         file_save(current_file)
-        file_open = MaxPlus.FileManager.Open
+        file_open = rt.loadMaxFile
         for path in checked_file_path_list:
             print(path)
             #프레임 설정
@@ -531,7 +530,9 @@ class FullAniSetView(QtWidgets.QDialog):
             rt.animationRange = range_interval(0, end_frame - start_frame)
             save_file_name = u'{0}\\{1}_{2}.max'.format(max_dir, maxfile_name , name)
             file_save(save_file_name)
-            file_open(current_file, True)
+            # file_open(current_file, True, True, False )
+            file_open(current_file, quiet=True, prompt=True, useFileUnits=True)
+        print('==End==')
         rt.ShellLaunch(current_dir, "")
     def TestPrint(self, test_string=u"Test"):
         ''' 임시 함수로 인자값이나 기능 테스트용으로 사용 '''
