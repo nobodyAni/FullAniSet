@@ -353,7 +353,7 @@ class FullAniSetView(QtWidgets.QDialog):
         if checked_file_path_list.count == 0:
             QtWidgets.QMessageBox.about(self, u"알림",u'선택된 것이 없습니다. (Nothing is selected)' )
             return 
-        maxfile_name, ok = QtWidgets.QInputDialog.getText(self,u"기본 파일명 입력", u"[입력이름_프레임이름] 형식으로 생성됩니다.",
+        maxfile_name, ok = QtWidgets.QInputDialog.getText(self,u"기본 파일명 입력", u"[입력이름][프레임이름] 형식으로 생성됩니다.",
                                                          QtWidgets.QLineEdit.EchoMode.Normal, maxfile_name)
         if not ok:
             return
@@ -528,7 +528,7 @@ class FullAniSetView(QtWidgets.QDialog):
             '''
             rt.execute(keymove_script)
             rt.animationRange = range_interval(0, end_frame - start_frame)
-            save_file_name = u'{0}\\{1}_{2}.max'.format(max_dir, maxfile_name , name)
+            save_file_name = u'{0}\\{1}{2}.max'.format(max_dir, maxfile_name , name)
             file_save(save_file_name)
             # file_open(current_file, True, True, False )
             file_open(current_file, quiet=True, prompt=True, useFileUnits=True)
